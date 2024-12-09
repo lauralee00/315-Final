@@ -1,0 +1,153 @@
+---
+title: "Final"
+output: html_document
+date: "2024-12-09"
+---
+
+```{r setup, echo=FALSE, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set()
+```
+
+## Research Question #[number]: How do geographic regions differ by various indicators of national prosperity?
+
+<br>
+To answer the above question, we observe clustering behaviors of geographic regions on important metrics, such as GDP, Internet, Birth, Literacy, Electricity, and Political Stability rate. Since GDP is a multiplier on population, we normalize it into a new transformed variable, GDP per capita. 
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# install.packages("vroom")
+library(tidyverse)
+library(readr)
+library(dplyr)
+
+# Define column types
+column_types <- cols(
+  `Country Name` = col_character(),
+  `Country Code` = col_character(),
+  Region = col_character(),
+  IsCountry = col_integer(),  # Read as integer first
+  `Income group` = col_character(),
+  Year = col_integer(),
+  Alcohol = col_double(),
+  BattleDeaths = col_double(),
+  Birth = col_double(),
+  BirthSex = col_double(),
+  CO2Emissions = col_double(),
+  CompulsoryEducation = col_double(),
+  Death = col_double(),
+  DeathsCD = col_double(),
+  DeathsNCD = col_double(),
+  Density = col_double(),
+  Diabetes = col_double(),
+  Electricity = col_double(),
+  Fertility = col_double(),
+  FixedTelephone = col_double(),
+  ForestArea = col_double(),
+  GDP = col_double(),
+  GenderEducation = col_double(),
+  GenderEquality = col_double(),
+  GovernmentExpenditure = col_double(),
+  Homicide = col_double(),
+  Income = col_double(),
+  Internet = col_double(),
+  LandArea = col_double(),
+  LegalRights = col_double(),
+  Literacy = col_double(),
+  Military = col_double(),
+  Mobile = col_double(),
+  PM2.5 = col_double(),
+  PlaneDepartures = col_double(),
+  PlanePassengers = col_double(),
+  PoliticalStability = col_double(),
+  Population = col_double(),
+  Poverty = col_double(),
+  Rural = col_double(),
+  RuralArea = col_double(),
+  Suicide = col_double(),
+  TaxRevenue = col_double(),
+  Unemployment = col_double(),
+  Urban = col_double(),
+  UrbanArea = col_double()
+)
+
+data <- read_csv("Downloads/world-bank.csv", col_types = column_types)
+
+data <- data %>%
+  mutate(IsCountry = case_when(
+    IsCountry == 1 ~ TRUE,
+    IsCountry == 0 ~ FALSE,
+    TRUE ~ NA  
+  ))
+
+data$GDPperCapita = data$GDP/data$Population
+
+# Step 1: Select relevant columns including Region and remove rows with NA in any of those columns
+data_quant <- data %>%
+  select(GDPperCapita, Internet, Birth, Literacy, Region, Electricity, PoliticalStability) %>%
+  na.omit()  # Remove rows with missing values for GDP, Internet, Literacy, or Region
+
+data_quant_scaled <- scale(select(data_quant, where(is.numeric)), 
+                           center = FALSE, scale = apply(select(data_quant, where(is.numeric)), 2, sd, na.rm = TRUE))
+
+# Step 3: Compute MDS based on the scaled data
+data_dist <- dist(data_quant_scaled)
+data_mds <- cmdscale(data_dist, k = 3)
+data_mds_df <- as.data.frame(data_mds)
+colnames(data_mds_df) <- c("mds1", "mds2", "mds3")
+
+# Step 4: Merge the MDS results with data_quant (which includes 'Region')
+data_quant_mds <- cbind(data_quant, data_mds_df)
+
+# Step 5: Merge the MDS data back into the original data frame
+data_final <- left_join(data, data_quant_mds, by = "Region", relationship = "many-to-many")
+data_final <- data_final %>%
+  filter(!is.na(mds1) & !is.na(mds2) & !is.na(mds3))
+
+# Step 6: Plot MDS result with coloring by 'Region'
+ggplot(data_final, aes(x = mds1, y = mds2, color = Region)) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "MDS Scatterplot by Region",subtitle = "Using GDPperCapita, Internet, Birth, Literacy, Electricity, PoliticalStability", x = "MDS Dimension 1", y = "MDS Dimension 2") +
+  theme(legend.position = "bottom")
+```
+
+<br>
+The above 2d MDS plot suggests some clustering of Sub Saharan Africa, Europe & Central Asia, and Latin America & Caribbean, as well as some overlap in clusters of other regions, but clustering of all 6 regions is difficult to observe. We could create side-by-side plots for each cluster, but doing so makes gauging the distance between clusters difficult. Instead, we use plotly to create an interactive 3d MDS plot to further differentiate the clusters.  
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# install.packages("plotly")
+library(plotly)
+
+# Create a 3D plot
+plot_ly(data_final, x = ~mds1, y = ~mds2, z = ~mds3, color = ~Region, 
+        type = "scatter3d", mode = "markers") %>%
+  layout(title = "3D MDS Scatterplot by Region", 
+         annotations = list(
+        list(
+          text = "Using GDPperCapita, Internet, Birth, Literacy, Electricity, PoliticalStability", 
+          x = 0.5, 
+          y = 1,  # Slightly above the plot (can adjust as needed)
+          xanchor = "center",
+          yanchor = "top",
+          showarrow = FALSE,
+          font = list(size = 12, color = "gray")
+        )
+    ),
+        margin = list(l = 50, r = 50, b = 100, t = 50),  
+         scene = list(xaxis = list(title = 'MDS Dimension 1'),
+                      yaxis = list(title = 'MDS Dimension 2'),
+                      zaxis = list(title = 'MDS Dimension 3')
+                      ),
+    width = 1000,  
+    height = 600
+  )
+
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+The above 3d MDS plot shows a clearer distinction for all the geographic clusters of varying spread. We observe that Sub-Saharan Africa and Middle East & North Africa are the most distinct by the chosen indicators out of all the regions. In comparison, other 4 regions show noticible overlap in clustering, especially Europe & Central Asia and Latin America & Carribean, suggesting regional similarities. These two MDS plots suggest meaningful differences and similarities across regions on these important metrics of national prosperity.
+
