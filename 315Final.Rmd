@@ -8,11 +8,97 @@ date: "2024-12-09"
 knitr::opts_chunk$set()
 ```
 
+---
+
+## Dataset Overview
+
+The **World Development Indicators (WDI)** dataset, sourced from the World Bank, provides a comprehensive view of development metrics across countries and regions from 2013 to 2022. This dataset is ideal for exploring relationships among socio-economic, environmental, and political indicators, as well as observing trends and disparities across regions. More information about the WDI dataset, including variables, can be found here: https://cmustatistics.github.io/data-repository/politics/world-bank.html
+
+---
+
+### Key Features:
+- **Timeframe**: Data covers ten years (2013–2022).
+- **Scope**: Includes 266 countries and regions, including aggregates like "Sub-Saharan Africa."
+- **Variables**: Features 40 indicators capturing diverse aspects of development.
+- **Granularity**: Each row represents a single country, territory, or region in a given year.
+- **Limitations**: Not all variables are available for all countries in all years, and more recent data is missing more often than older data.
+
+---
+
+### Variables Used in Analysis
+
+To address our research questions, we selected the following [insert number] variables, representing key aspects of national prosperity. For each variable, its form and value range are described.
+
+---
+
+#### 1. GDP per Capita (`GDPperCapita`)
+- **Definition**: The gross domestic product (GDP) divided by the total population of a country or region.
+- **Form**: Continuous numeric variable, measured in USD.
+- **Range**: Varies widely, e.g., from hundreds in low-income countries to over $100,000 in high-income nations.
+- **Relevance**: A critical measure of economic prosperity, often used to compare development levels across regions.
+
+---
+
+#### 2. Internet Usage (`Internet`)
+- **Definition**: The percentage of the population with Internet access.
+- **Form**: Continuous numeric variable, measured as a percentage.
+- **Range**: 0% to 100%, where 0% indicates no Internet access and 100% indicates universal Internet access within the population.
+- **Relevance**: Reflects technological development and access to digital resources.
+
+---
+
+#### 3. Birth Rate (`Birth`)
+- **Definition**: The crude birth rate, expressed as the number of live births per 1,000 people per year.
+- **Form**: Continuous numeric variable, typically ranging between 5 (low birth rates in developed countries) to 50 (high birth rates in developing regions).
+- **Relevance**: Provides insights into population growth trends and socio-economic factors such as healthcare access.
+
+---
+
+#### 4. Literacy Rate (`Literacy`)
+- **Definition**: The percentage of adults (15 years and older) who can read and write.
+- **Form**: Continuous numeric variable, measured as a percentage.
+- **Range**: 0% to 100%, where higher values indicate better educational outcomes.
+- **Relevance**: A strong indicator of human capital, with implications for economic productivity and quality of life.
+
+---
+
+#### 5. Access to Electricity (`Electricity`)
+- **Definition**: The percentage of the population with access to electricity.
+- **Form**: Continuous numeric variable, measured as a percentage.
+- **Range**: 0% to 100%, where 0% indicates no access and 100% indicates universal access within the population.
+- **Relevance**: An essential infrastructure metric, reflecting living standards and economic development.
+
+---
+
+#### 6. Political Stability (`PoliticalStability`)
+- **Definition**: A z-score measuring the likelihood of political instability or violence within a country.
+- **Form**: Continuous numeric variable, normalized as a z-score.
+- **Range**: Typically ranges between -2.5 (very unstable) to 2.5 (highly stable).
+- **Relevance**: Captures governance quality and security, crucial for understanding development risks.
+
+---
+
+### Why These Variables?
+
+These indicators were selected to represent a balanced view of economic, social, and political development:<br>
+- **Economic**: `GDPperCapita` and `Electricity`<br>
+- **Technological**: `Internet`<br>
+- **Demographic**: `Birth`<br>
+- **Social**: `Literacy`<br>
+- **Political**: `PoliticalStability`<br>
+
+Together, they provide a robust framework for examining regional clustering and disparities in national prosperity.
+
+
+---
+
 ## Research Question #[number]: How do geographic regions differ by various indicators of national prosperity?
 
-<br>
-To answer the above question, we observe clustering behaviors of geographic regions on important metrics, such as GDP, Internet, Birth, Literacy, Electricity, and Political Stability rate. Since GDP is a multiplier on population, we normalize it into a new transformed variable, GDP per capita. 
-<br>
+---
+
+To answer the above question, we observe clustering behaviors of geographic regions on important metrics, such as `GDP`, `Internet`, `Birth`, `Literacy`, `Electricity`, and `Political Stability` rate. Since `GDP` is a multiplier on population, we normalize it into a new transformed variable, `GDPperCapita.` 
+
+---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # install.packages("vroom")
@@ -111,9 +197,13 @@ ggplot(data_final, aes(x = mds1, y = mds2, color = Region)) +
   theme(legend.position = "bottom")
 ```
 
+---
+
 <br>
 The above 2d MDS plot suggests some clustering of Sub Saharan Africa, Europe & Central Asia, and Latin America & Caribbean, as well as some overlap in clusters of other regions, but clustering of all 6 regions is difficult to observe. We could create side-by-side plots for each cluster, but doing so makes gauging the distance between clusters difficult. Instead, we use plotly to create an interactive 3d MDS plot to further differentiate the clusters.  
 <br>
+
+---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # install.packages("plotly")
@@ -144,10 +234,16 @@ plot_ly(data_final, x = ~mds1, y = ~mds2, z = ~mds3, color = ~Region,
   )
 
 ```
+
 <br>
 <br>
 <br>
 <br>
 <br>
+
+---
+
 The above 3d MDS plot shows a clearer distinction for all the geographic clusters of varying spread. We observe that Sub-Saharan Africa and Middle East & North Africa are the most distinct by the chosen indicators out of all the regions. In comparison, other 4 regions show noticible overlap in clustering, especially Europe & Central Asia and Latin America & Carribean, suggesting regional similarities. These two MDS plots suggest meaningful differences and similarities across regions on these important metrics of national prosperity.
+
+---
 
