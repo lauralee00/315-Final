@@ -156,7 +156,7 @@ column_types <- cols(
   UrbanArea = col_double()
 )
 
-data <- read_csv("Downloads/world-bank.csv", col_types = column_types)
+data <- read_csv("world-bank.csv", col_types = column_types)
 
 data <- data %>%
   mutate(IsCountry = case_when(
