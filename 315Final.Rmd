@@ -10,6 +10,22 @@ date: "2024-12-09"
 knitr::opts_chunk$set()
 ```
 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# install.packages('readr')
+# install.packages('tidyverse')
+# install.packages('dplyr')
+# install.packages("vroom")
+# install.packages("plotly")
+
+library(plotly)
+library(vroom)
+library(tidyverse)
+library(readr)
+library(dplyr)
+```
+
+
 ---
 
 ## Dataset Overview
@@ -103,11 +119,6 @@ To answer the above question, we observe clustering behaviors of geographic regi
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# install.packages("vroom")
-library(tidyverse)
-library(readr)
-library(dplyr)
-
 # Define column types
 column_types <- cols(
   `Country Name` = col_character(),
@@ -208,9 +219,6 @@ The above 2d MDS plot suggests some clustering of Sub Saharan Africa, Europe & C
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# install.packages("plotly")
-library(plotly)
-
 # Create a 3D plot
 plot_ly(data_final, x = ~mds1, y = ~mds2, z = ~mds3, color = ~Region, 
         type = "scatter3d", mode = "markers") %>%
